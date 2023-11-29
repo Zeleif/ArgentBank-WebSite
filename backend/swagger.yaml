@@ -150,49 +150,7 @@ paths:
         '500':
           description: Internal Server Error
 
-  paths:
-  /transactions/{numero_compte}/{id_transaction}:
-    put:
-      tags:
-        - Transaction Module
-      summary: Modifier une transaction
-      description: Modifie une transaction existante pour un compte spécifié.
-      security:
-        - Bearer: []
-
-      parameters:
-        - name: numero_compte
-          in: path
-          required: true
-          type: string
-          description: Le numéro du compte bancaire
-        - name: id_transaction
-          in: path
-          required: true
-          type: string
-          description: L'identifiant de la transaction à modifier
-        - name: modification_transaction
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/TransactionModification'
-      produces:
-        - application/json
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/ApiResponse'
-        '401':
-          description: Non autorisé
-        '404':
-          description: Compte ou transaction non trouvé
-        '422':
-          description: Erreur de validation des données
-        '500':
-          description: Internal Server Error
-
-paths:
+ paths:
   /transactions/{numero_compte}/{id_transaction}:
     put:
       tags:
@@ -304,65 +262,6 @@ definitions:
         type: string
         description: Message associé à la réponse
 
-securityDefinitions:
-  jwt_token:
-    type: apiKey
-    name: Authorization
-    in: header
-        '500':
-          description: Internal Server Error
-    paths:
-  /transactions/{numero_compte}/{id_transaction}:
-    put:
-      summary: Modifier une transaction
-      description: Modifie une transaction existante pour un compte spécifié.
-      security:
-        - jwt_token: []
-
-      parameters:
-        - name: numero_compte
-          in: path
-          required: true
-          type: string
-          description: Le numéro du compte bancaire
-        - name: id_transaction
-          in: path
-          required: true
-          type: string
-          description: L'identifiant de la transaction à modifier
-        - name: modification_transaction
-          in: body
-          required: true
-          schema:
-            type: object
-            properties:
-              montant:
-                type: number
-                description: Le nouveau montant de la transaction
-              description:
-                type: string
-                description: La nouvelle description de la transaction
-
-      responses:
-        '200':
-          description: OK
-        '401':
-          description: Non autorisé
-        '404':
-          description: Compte ou transaction non trouvé
-        '422':
-          description: Erreur de validation des données
-        '500':
-          description: Internal Server Error
-
-
-
-securityDefinitions:
-  jwt_token:
-    type: apiKey
-    name: Authorization
-    in: header
-definitions:
   User:
     properties:
       email:
@@ -377,6 +276,7 @@ definitions:
       lastName:
         type: string
         description: user last name
+
   Login:
     properties:
       email:
@@ -385,25 +285,13 @@ definitions:
       password:
         type: string
         description: user password
-  ApiResponse:
-    type: object
-    properties:
-      status:
-        type: integer
-      message:
-        type: string
-      body:
-        type: object
-        properties:
-          id:
-            type: string
-          email:
-            type: string
+
   LoginResponse:
     type: object
     properties:
       token:
         type: string
+
   UserProfile:
     type: object
     properties:
@@ -411,6 +299,7 @@ definitions:
         type: string
       lastName:
         type: string
+
   TransactionsResponse:
     type: object
     properties:
@@ -437,6 +326,7 @@ definitions:
                     type: integer
                   balance:
                     type: integer
+
   TransactionResponse:
     type: object
     properties:
@@ -456,6 +346,7 @@ definitions:
                 type: string
               notes:
                 type: string
+
   Transaction:
     type: object
     properties:

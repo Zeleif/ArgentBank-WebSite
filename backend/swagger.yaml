@@ -115,127 +115,172 @@ paths:
           description: Internal Server Error
 
 
-  /user/transactions/{month}:
+  paths:
+  /user/{user_id}/comptes-bancaires:
     get:
-      tags:
-        - Transactions Module
-      summary: Month Transactions API
-      description: API for fetching the transactions of the current month
+      summary: Liste des comptes bancaires de l'utilisateur
+      description: Récupère la liste des comptes bancaires appartenant à l'utilisateur identifié par l'ID.
+      security:
+        - jwt_token: []
+
       parameters:
-        - type: string
-          in: header
-          name: Authorization
-          description: Attach Bearer JWT token
+        - name: id_utilisateur
+          in: path
           required: true
-      produces:
-        - application/json
+          type: string
+          description: L'identifiant de l'utilisateur
+
       responses:
         '200':
-          description: Transactions received successfully
+          description: OK
           schema:
-            $ref: '#/definitions/TransactionsResponse'
-        '400':
-          description: Invalid Fields
+            type: array
+            items:
+              type: object
+              properties:
+                numero_compte:
+                  type: string
+                solde:
+                  type: number
         '401':
-          description: Request Lacks Valid Authentication
+          description: Non autorisé
         '404':
-          description: Requested Resource Not Found
+          description: Utilisateur non trouvé
+
         '500':
           description: Internal Server Error
-  /user/transactions/{transactionId}:
+
+   /transactions/{numero_compte}/dernieres-5:
     get:
-      tags:
-        - Transactions Module
-      summary: Transaction Informations API
-      description: API for fetching the informations of a transaction
+      summary: Récupérer les 5 dernières transactions d'un compte
+      description: Récupère les 5 dernières transactions du compte spécifié.
+      security:
+        - jwt_token: []
+
       parameters:
-        - type: string
-          in: header
-          name: Authorization
-          description: Attach Bearer JWT token
+        - name: numero_compte
+          in: path
           required: true
-      produces:
-        - application/json
+          type: string
+          description: Le numéro du compte bancaire
       responses:
         '200':
-          description: Transaction informations received Successfully
+          description: OK
           schema:
-            $ref: '#/definitions/TransactionResponse'
-        '400':
-          description: Invalid Fields
+            type: array
+            items:
+              type: object
+              properties:
+                date:
+                  type: string
+                  format: date
+                montant:
+                  type: number
+                description:
+                  type: string
         '401':
-          description: Request Lacks Valid Authentication
+          description: Non autorisé
         '404':
-          description: Requested Resource Not Found
+          description: Compte non trouvé
         '500':
           description: Internal Server Error
+
+     /transactions/{numero_compte}/mois/{mois}:
+    get:
+      summary: Récupérer les transactions du mois sélectionné pour un compte
+      description: Récupère les transactions du mois spécifié pour le compte donné.
+      security:
+        - jwt_token: []
+
+      parameters:
+        - name: numero_compte
+          in: path
+          required: true
+          type: string
+          description: Le numéro du compte bancaire
+        - name: mois
+          in: path
+          required: true
+          type: integer
+          minimum: 1
+          maximum: 12
+          description: Le mois pour lequel récupérer les transactions
+
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                date:
+                  type: string
+                  format: date
+                montant:
+                  type: number
+                description:
+                  type: string
+        '401':
+          description: Non autorisé
+        '404':
+          description: Compte non trouvé
+
+securityDefinitions:
+  jwt_token:
+    type: apiKey
+    name: Authorization
+    in: header
+        '500':
+          description: Internal Server Error
+    paths:
+  /transactions/{numero_compte}/{id_transaction}:
     put:
+      summary: Modifier une transaction
+      description: Modifie une transaction existante pour un compte spécifié.
       security:
-        - Bearer: []
-      tags:
-        - Transactions Module
-      summary: Transaction Informations API
-      description: API for updating the informations of a transaction
+        - jwt_token: []
+
       parameters:
-        - type: string
-          in: header
-          name: Authorization
-          description: Attach Bearer JWT token
+        - name: numero_compte
+          in: path
           required: true
-        - in: body
-          name: body
-          description: Update user transaction informations
+          type: string
+          description: Le numéro du compte bancaire
+        - name: id_transaction
+          in: path
+          required: true
+          type: string
+          description: L'identifiant de la transaction à modifier
+        - name: modification_transaction
+          in: body
           required: true
           schema:
-            $ref: '#/definitions/Transaction'
-      produces:
-        - application/json
+            type: object
+            properties:
+              montant:
+                type: number
+                description: Le nouveau montant de la transaction
+              description:
+                type: string
+                description: La nouvelle description de la transaction
+
       responses:
         '200':
-          description: Transaction informations updated
-          schema:
-            $ref: '#/definitions/TransactionResponse'
-        '400':
-          description: Invalid Fields
+          description: OK
         '401':
-          description: Request Lacks Valid Authentication
+          description: Non autorisé
         '404':
-          description: Requested Resource Not Found
-        '500':
-          description: Internal Server Error
-    delete:
-      security:
-        - Bearer: []
-      tags:
-        - Transactions Module
-      summary: Transaction Informations API
-      description: API for updating the informations of a transaction
-      parameters:
-        - type: string
-          in: header
-          name: Authorization
-          description: Attach Bearer JWT token
-          required: true
-      produces:
-        - application/json
-      responses:
-        '200':
-          description: Transaction deleted successfuly
-          schema:
-            $ref: '#/definitions/TransactionDeletedResponse'
-        '400':
-          description: Invalid Fields
-        '401':
-          description: Request Lacks Valid Authentication
-        '404':
-          description: Requested Resource Not Found
+          description: Compte ou transaction non trouvé
+        '422':
+          description: Erreur de validation des données
         '500':
           description: Internal Server Error
 
 
 
 securityDefinitions:
-  Bearer:
+  jwt_token:
     type: apiKey
     name: Authorization
     in: header

@@ -150,12 +150,15 @@ paths:
         '500':
           description: Internal Server Error
 
-   /transactions/{numero_compte}/dernieres-5:
-    get:
-      summary: Récupérer les 5 dernières transactions d'un compte
-      description: Récupère les 5 dernières transactions du compte spécifié.
+  paths:
+  /transactions/{numero_compte}/{id_transaction}:
+    put:
+      tags:
+        - Transaction Module
+      summary: Modifier une transaction
+      description: Modifie une transaction existante pour un compte spécifié.
       security:
-        - jwt_token: []
+        - Bearer: []
 
       parameters:
         - name: numero_compte
@@ -163,27 +166,52 @@ paths:
           required: true
           type: string
           description: Le numéro du compte bancaire
+        - name: id_transaction
+          in: path
+          required: true
+          type: string
+          description: L'identifiant de la transaction à modifier
+        - name: modification_transaction
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/TransactionModification'
+      produces:
+        - application/json
       responses:
         '200':
           description: OK
           schema:
-            type: array
-            items:
-              type: object
-              properties:
-                date:
-                  type: string
-                  format: date
-                montant:
-                  type: number
-                description:
-                  type: string
+            $ref: '#/definitions/ApiResponse'
         '401':
           description: Non autorisé
         '404':
-          description: Compte non trouvé
+          description: Compte ou transaction non trouvé
+        '422':
+          description: Erreur de validation des données
         '500':
           description: Internal Server Error
+
+definitions:
+  TransactionModification:
+    type: object
+    properties:
+      montant:
+        type: number
+        description: Le nouveau montant de la transaction
+      description:
+        type: string
+        description: La nouvelle description de la transaction
+
+  ApiResponse:
+    type: object
+    properties:
+      status:
+        type: string
+        description: Statut de la réponse
+      message:
+        type: string
+        description: Message associé à la réponse
 
      /transactions/{numero_compte}/mois/{mois}:
     get:

@@ -2,13 +2,12 @@ swagger: '2.0'
 info:
   title: Bank Argent API documentation
   description: Contains all available API endpoints in this codebase
-  version: '1.0.0'
+  version: '2.0.0'
   termsOfService: 'http://swagger.io/terms/'
 host: localhost:3001
-basePath: /api/v1
+basePath: /api/v2
 schemes:
   - http
-
 paths:
   /user/login:
     post:
@@ -66,14 +65,8 @@ paths:
         - User Module
       summary: User Profile API
       description: API for fetching a user profile
-      parameters:
-        - type: string
-          in: header
-          name: Authorization
-          description: Attach Bearer JWT token
-          required: true
-      produces:
-        - application/json
+      #produces:
+       # - application/json
       responses:
         '200':
           description: User profile retrieved successully
@@ -91,11 +84,6 @@ paths:
       summary: User Profile API
       description: API for updating a user profile
       parameters:
-        - type: string
-          in: header
-          name: Authorization
-          description: Attach Bearer JWT token
-          required: true
         - in: body
           name: body
           description: Update user profile attributes
@@ -114,154 +102,213 @@ paths:
         '500':
           description: Internal Server Error
 
-
-  paths:
-  /user/{user_id}/comptes-bancaires:
-    get:
-      summary: Liste des comptes bancaires de l'utilisateur
-      description: Récupère la liste des comptes bancaires appartenant à l'utilisateur identifié par l'ID.
-      security:
-        - jwt_token: []
-
-      parameters:
-        - name: id_utilisateur
-          in: path
-          required: true
-          type: string
-          description: L'identifiant de l'utilisateur
-
-      responses:
-        '200':
-          description: OK
-          schema:
-            type: array
-            items:
-              type: object
-              properties:
-                numero_compte:
-                  type: string
-                solde:
-                  type: number
-        '401':
-          description: Non autorisé
-        '404':
-          description: Utilisateur non trouvé
-
-        '500':
-          description: Internal Server Error
-
- paths:
-  /transactions/{numero_compte}/{id_transaction}:
-    put:
+          
+  /user/account:
+    post: 
       tags:
-        - Transaction Module
-      summary: Modifier une transaction
-      description: Modifie une transaction existante pour un compte spécifié.
+        - Accounts and Transactions Module
+      summary: All accounts
+      description: API for retrieving all user accounts
       security:
         - Bearer: []
-
-      parameters:
-        - name: numero_compte
-          in: path
-          required: true
-          type: string
-          description: Le numéro du compte bancaire
-        - name: id_transaction
-          in: path
-          required: true
-          type: string
-          description: L'identifiant de la transaction à modifier
-        - name: modification_transaction
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/TransactionModification'
-      produces:
-        - application/json
-      responses:
+      responses: 
         '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/ApiResponse'
-        '401':
-          description: Non autorisé
-        '404':
-          description: Compte ou transaction non trouvé
-        '422':
-          description: Erreur de validation des données
-        '500':
-          description: Internal Server Error
-
-  /transactions/{numero_compte}/mois/{mois}:
-    get:
-      summary: Récupérer les transactions du mois sélectionné pour un compte
-      description: Récupère les transactions du mois spécifié pour le compte donné.
-      security:
-        - jwt_token: []
-
-      parameters:
-        - name: numero_compte
-          in: path
-          required: true
-          type: string
-          description: Le numéro du compte bancaire
-        - name: mois
-          in: path
-          required: true
-          type: integer
-          minimum: 1
-          maximum: 12
-          description: Le mois pour lequel récupérer les transactions
-
-      responses:
-        '200':
-          description: OK
+          description: All accounts retrieved successfully
           schema:
             type: array
             items:
-              type: object
-              properties:
-                date:
-                  type: string
-                  format: date
-                montant:
-                  type: number
-                description:
-                  type: string
+              $ref: '#/definitions/AccountResponse'
         '401':
-          description: Non autorisé
-        '404':
-          description: Compte non trouvé
+          description: Unauthorized user
         '500':
           description: Internal Server Error
 
+  /account/{accountID}/transactions:
+    post:
+      tags:
+        - Accounts and Transactions Module
+      summary: Account transactions
+      description: API for retrieving a list of transactions associated with an account
+      security: 
+        - Bearer: []
+      parameters:
+        - in: path
+          name: accountID
+          description: ID of an account
+          required: true
+          type: string
+      responses:
+        '200':
+          description: All transactions retrieved successfully
+          schema: 
+            type: array
+            items:
+              $ref: '#/definitions/TransactionsResponse'
+        '401':
+          description: Unauthorized user
+        '404': 
+          description: Account not found
+        '500':
+          description: Internal Server Error
+
+  /account/{accountID}/transactions/recent:
+    get:
+      tags:
+        - Accounts and Transactions Module
+      summary: Recent transactions
+      description: API for retrieving the three most recent transactions associated with an account
+      security:
+        - Bearer: []
+      parameters:
+        - in: path
+          name: accountID
+          description: ID of an account
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Three most recent transactions retrieved successfully
+          schema: 
+            type: array
+            items:
+              $ref: '#/definitions/TransactionsResponse'
+        '401':
+          description: Unauthorized user
+        '404': 
+          description: Account not found
+        '500':
+          description: Internal Server Error
+  /transactions/{transactionID}/category:
+    put:
+      tags:
+        - Accounts and Transactions Module
+      summary: Update transaction's category
+      description: API for updating category of transaction
+      security: 
+        - Bearer: []
+      parameters:
+        - in: path
+          name: transactionID
+          description: ID of a transaction
+          required: true
+          type: string
+        - in: body
+          name: category
+          description: Modified transaction's category
+          required: true
+          schema:
+            $ref: '#/definitions/TransactionCategory'
+      responses:
+        '200':
+          description: Transaction's category modified successfully
+          schema: 
+            $ref: '#/definitions/TransactionCategory'
+        '401': 
+          description: Unauthorized user
+        '404': 
+          description: Transaction not found
+        '500': 
+          description: Internal Servor Error
+  /transactions/{transactionID}/note:
+    post:
+      tags:
+        - Accounts and Transactions Module
+      summary: Add transaction's note
+      description: API for adding a note to a transaction
+      security: 
+        - Bearer: []
+      parameters:
+        - in: path
+          name: transactionID
+          description: ID of a transaction
+          required: true
+          type: string
+        - in: body
+          name: note
+          description: New transaction's note
+          required: true
+          schema: 
+            $ref: '#/definitions/TransactionNote'
+      responses:
+        '200':
+          description: Note added to the transaction successfully
+          schema: 
+            $ref: '#/definitions/TransactionResponseNote'
+        '401':
+          description: Unauthorized user
+        '404':
+          description: Note not created
+        '500':
+          description: Internal Server Error
+  /transactions/{transactionID}/note/{noteID}:
+    put:
+      tags:
+        - Accounts and Transactions Module
+      summary: Modify transaction's note
+      description: API for modifying a note of a transaction
+      security: 
+        - Bearer: []
+      parameters:
+        - in: path
+          name: transactionID
+          description: ID of a transaction
+          required: true
+          type: string
+        - in: path
+          name: noteID
+          description: ID of a note
+          required: true
+          type: string
+        - in: body
+          name: note
+          description: Modify transaction's note
+          required: true
+          schema: 
+            $ref: '#/definitions/TransactionNote'
+      responses:
+        '200':
+          description: Note modified successfully
+          schema:
+            $ref: '#/definitions/TransactionResponseNote'
+        '401':
+          description: Unauthorized user
+        '404':
+          description: Note not modified
+        '500':
+          description: Internal Server Error
+    delete:
+      tags:
+        - Accounts and Transactions Module
+      summary: Delete transaction's note
+      description: API for deleting a note of a transaction
+      security:
+        - Bearer: []
+      parameters:
+        - in: path
+          name: transactionID
+          description: ID of a transaction
+          required: true
+          type: string
+        - in: path
+          name: noteID
+          description: ID of a note
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Note deleted successfully
+        '401':
+          description: Unauthorized user
+        '404':
+          description: Note not deleted
+        '500':
+          description: Internal Server Error
 securityDefinitions:
-  jwt_token:
+  Bearer:
     type: apiKey
     name: Authorization
     in: header
-
 definitions:
-  TransactionModification:
-    type: object
-    properties:
-      montant:
-        type: number
-        description: Le nouveau montant de la transaction
-      description:
-        type: string
-        description: La nouvelle description de la transaction
-
-  ApiResponse:
-    type: object
-    properties:
-      status:
-        type: string
-        description: Statut de la réponse
-      message:
-        type: string
-        description: Message associé à la réponse
-
   User:
     properties:
       email:
@@ -276,7 +323,9 @@ definitions:
       lastName:
         type: string
         description: user last name
-
+      userName:
+        type: string
+        description: user public name
   Login:
     properties:
       email:
@@ -285,82 +334,89 @@ definitions:
       password:
         type: string
         description: user password
-
+  ApiResponse:
+    type: object
+    properties:
+      status:
+        type: integer
+      message:
+        type: string
+      body:
+        type: object
+        properties:
+          id:
+            type: string
+          email:
+            type: string
   LoginResponse:
     type: object
     properties:
       token:
         type: string
-
   UserProfile:
     type: object
     properties:
-      firstName:
+      userName:
         type: string
-      lastName:
-        type: string
-
+  AccountResponse:
+      type: object
+      properties:
+        accountID:
+          type: string
+          description: account ID
+        accountName:
+          type: string
+          description: account name
+        accountCurrency:
+          type: string
+          description: account currency
+        currentBalance:
+          type: number
+          description: current account balance
+          format: double
   TransactionsResponse:
     type: object
     properties:
-      status:
-        type: integer
-      message:
+      transactionID: 
         type: string
-      body:
-        type: object
-        properties:
-          transactions:
-            type: object
-            properties:
-              transaction:
-                type: object
-                properties:
-                  id:
-                    type: string
-                  date:
-                    type: string
-                  description:
-                    type: string
-                  amount:
-                    type: integer
-                  balance:
-                    type: integer
-
-  TransactionResponse:
-    type: object
-    properties:
-      status:
-        type: integer
-      message:
-        type: string
-      body:
-        type: object
-        properties:
-          transaction:
-            type: object
-            properties:
-              transactionType:
-                type: string
-              category:
-                type: string
-              notes:
-                type: string
-
-  Transaction:
-    type: object
-    properties:
+        description: transaction ID
       transactionType:
         type: string
+        description: type of transaction
+      date:
+        type: string
+        format: date-time
+        description: date of transaction
+      description:
+        type: string
+        description: description of transaction
+      amount:
+        type: number
+        description: transaction amout
+      balance:
+        type: number
+        description: available balance
+        format: double
       category:
         type: string
-      notes:
+        description: name of the category
+      note: 
         type: string
-
-  TransactionDeletedResponse:
+        description: user note
+  TransactionCategory:
     type: object
     properties:
-      status:
-        type: integer
-      message:
+      category:
         type: string
+  TransactionNote:
+    type: object
+    properties:
+      note:
+        type: string
+  TransactionResponseNote:
+    type: object
+    properties:
+      note:
+        type: string
+      noteID:
+        type: string      

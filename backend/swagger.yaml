@@ -178,6 +178,60 @@ paths:
           description: Account not found
         '500':
           description: Internal Server Error
+  /account/{accountID}/transactions/monthly:
+    get:
+      tags:
+        - Accounts and Transactions Module
+      summary: Recent transactions
+      description: API for retrieving the recent transactions associated with an account
+      security:
+        - Bearer: []
+      parameters:
+        - in: path
+          name: accountID
+          description: ID of an account
+          required: true
+          type: string
+      responses:
+        '200':
+          description: recent transactions retrieved successfully
+          schema: 
+            type: array
+            items:
+              $ref: '#/definitions/TransactionsResponse'
+        '401':
+          description: Unauthorized user
+        '404': 
+          description: Account not found
+        '500':
+          description: Internal Server Error
+   /account/{accountID}/transactions/r{transactionID}/details:
+    get:
+      tags:
+        - Accounts and Transactions Module
+      summary: Detail transactions
+      description: API for retrieving the most details transactions associated with an account
+      security:
+        - Bearer: []
+      parameters:
+        - in: path
+          name: accountID
+          description: ID of an account
+          required: true
+          type: string
+      responses:
+        '200':
+          description: details transactions retrieved successfully
+          schema: 
+            type: array
+            items:
+              $ref: '#/definitions/TransactionsResponse'
+        '401':
+          description: Unauthorized user
+        '404': 
+          description: Account not found
+        '500':
+          description: Internal Server Error
   /transactions/{transactionID}/category:
     put:
       tags:

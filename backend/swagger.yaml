@@ -208,7 +208,7 @@ paths:
       summary: Detail transactions
       description: API for retrieving the most detailed transactions associated with an account
       security:
-        - Bearer: []  # Utiliser le schéma d'authentification Bearer
+        - Bearer: []  
       parameters:
         - in: path
           name: accountID

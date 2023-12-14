@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom"
 import { setLogIn } from "../../redux/Reducers/UserAuthSlice"
 import TextInput from "../../components/TextInput/TextInput"
 import Button from "../../components/Button/Button"
+import signInService from "../../Services/API/SignInService"
 
 export default function SignIn() {
     const [email, setEmail] = useState("")
@@ -14,21 +15,16 @@ export default function SignIn() {
     const dispatch = useDispatch()
 
     const fetchLogIn = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
         try {
-            const response = await fetch("http://localhost:3001/api/v1/user/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password })
-            })
-            const data = await response.json()
-            const token = data.body.token
-            dispatch(setLogIn({ token }))
-            navigate("/user")
+            const data = await signInService(email, password);
+            const token = data.body.token;
+            dispatch(setLogIn({ token }));
+            navigate("/user");
         } catch (err) {
-            console.log(err)
+            console.log(err);
         }
-    }
+    };
 
     return (
         <main className="main bg-dark">

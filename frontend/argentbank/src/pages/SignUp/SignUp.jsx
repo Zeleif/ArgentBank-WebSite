@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom"
 import { setLogOut } from "../../redux/Reducers/UserAuthSlice"
 import TextInput from "../../components/TextInput/TextInput"
 import Button from "../../components/Button/Button"
+import signUpService from "../../Services/API/SignUpService"
 
 export default function SignUp() {
     const [email, setEmail] = useState("")
@@ -21,25 +22,21 @@ export default function SignUp() {
     const SignUp = async (e) => {
         e.preventDefault()
         try {
-            const response = await fetch("http://localhost:3001/api/v1/user/signup", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password, firstName, lastName, userName })
-            })
+            const response = await signUpService(email, password, firstName, lastName, userName);
 
             if (!response.ok) {
-                throw new Error("Inscription échouée")
+                throw new Error("Inscription échouée");
             }
-            dispatch(setLogOut())
-            setConfirmSuccess(true)
-            setSubmitSuccess(true)
-            setError(null)
-        } catch (err) {
-            console.error(err)
-            setError("Erreur lors de l'inscription")
-        }
-    }
 
+            dispatch(setLogOut());
+            setConfirmSuccess(true);
+            setSubmitSuccess(true);
+            setError(null);
+        } catch (err) {
+            console.error(err);
+            setError("Erreur lors de l'inscription");
+        }
+    };
     return (
         <main className="main bg-dark">
             <section className="sign-in-content">
